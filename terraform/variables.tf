@@ -11,7 +11,7 @@ variable "instance_type" {
 variable "key_name" {
   description = "Name of the existing AWS key pair to use for SSH"
   type        = string
-  default     = "test_key_pair"
+  default     = "test_key_pair_delete_me"
 }
 
 variable "vpc_id" {
