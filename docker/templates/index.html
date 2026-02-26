@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello from Kubernetes 🚀</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            color: #fff;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            padding: 60px 80px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .pod-info {
+            font-size: 1.1rem;
+            color: #d1d5db;
+            margin-bottom: 30px;
+        }
+
+        img {
+            width: 220px;
+            margin-top: 20px;
+            border-radius: 10px;
+            background: white;
+            padding: 15px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Hello from Kubernetes 🚀</h1>
+        <div class="pod-info">
+            Running on pod: <strong>{{ hostname }}</strong>
+        </div>
+        <img src="/static/logo.png" alt="Company Logo">
+        <div class="footer">
+            Secure • Containerized • Deployed via Ingress (HTTPS)
+        </div>
+    </div>
+</body>
+</html>
