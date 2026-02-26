@@ -9,10 +9,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "backend-s3-4127-delete-me"
-    key            = "k8s/terraform.tfstate"
-    region         = "eu-central-1"
-    encrypt        = true
+    bucket  = "backend-s3-4127-delete-me"
+    key     = "k8s/terraform.tfstate"
+    region  = "eu-central-1"
+    encrypt = true
   }
 }
 
