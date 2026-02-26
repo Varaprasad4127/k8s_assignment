@@ -7,6 +7,7 @@ on:
 
 env:
   AWS_REGION: ap-south-2
+  TF_VAR_public_key: ${{ secrets.TF_PUBLIC_KEY }}
 
 jobs:
   terraform-plan:

@@ -2,7 +2,7 @@ resource "aws_instance" "k8s_node" {
   ami                    = var.ami_id
   instance_type          = var.instance_type
   subnet_id              = var.subnet_id
-  key_name               = var.key_name
+  key_name               = aws_key_pair.test_key.key_name
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
   user_data = file("userdata.sh")
@@ -51,4 +51,9 @@ resource "aws_security_group" "ec2_sg" {
   tags = {
     Name = "terraform-ec2-sg"
   }
+}
+
+resource "aws_key_pair" "test_key" {
+  key_name   = var.key_name
+  public_key = var.public_key
 }

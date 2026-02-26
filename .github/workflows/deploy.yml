@@ -5,6 +5,7 @@ on:
 
 env:
   AWS_REGION: ap-south-2
+  TF_VAR_public_key: ${{ secrets.TF_PUBLIC_KEY }}
 
 jobs:
   terraform-apply:
@@ -33,4 +34,4 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
-        run: terraform delete -auto-approve
+        run: terraform destroy -auto-approve

@@ -30,3 +30,9 @@ variable "ami_id" {
   description = "AMI ID for Ubuntu 22.04"
   default     = "ami-01295e7cad1713e7a"
 }
+
+variable "public_key" {
+  description = "public key"
+  type        = string
+  default     = null
+}
