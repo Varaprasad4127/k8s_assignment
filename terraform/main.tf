@@ -48,7 +48,7 @@ resource "aws_security_group" "ec2_sg" {
   }
 
   tags = {
-    Name = "terraform-ec2-sg"
+    Name = "terraform-ec2-sg-delete-me"
   }
 }
 
