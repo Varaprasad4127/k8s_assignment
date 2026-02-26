@@ -8,12 +8,6 @@ variable "instance_type" {
   default     = "t3.medium"
 }
 
-variable "key_name" {
-  description = "Name of the existing AWS key pair to use for SSH"
-  type        = string
-  default     = "test_key_pair_delete_me"
-}
-
 variable "vpc_id" {
   description = "VPC ID to deploy the EC2"
   type        = string

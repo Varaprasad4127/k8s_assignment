@@ -8,15 +8,14 @@ resource "aws_instance" "k8s_node" {
   user_data = file("userdata.sh")
 
   tags = {
-    Name = "terraform-k8s-node"
+    Name = "terraform-k8s-node-delete-me"
   }
-  depends_on = [aws_security_group.ec2_sg]
 }
 
 
 
 resource "aws_security_group" "ec2_sg" {
-  name        = "terraform-ec2-sg"
+  name        = "terraform-ec2-sg-delete-me"
   description = "Allow SSH, HTTP, HTTPS"
   vpc_id      = var.vpc_id
 
@@ -54,6 +53,6 @@ resource "aws_security_group" "ec2_sg" {
 }
 
 resource "aws_key_pair" "test_key" {
-  key_name   = var.key_name
+  key_name   = "test_key_pair_delete_me"
   public_key = var.public_key
 }
