@@ -36,6 +36,6 @@ resource "aws_iam_role_policy_attachment" "attach_policy" {
 
 
 resource "aws_iam_instance_profile" "ec2_role_profile" {
-  name = "ec2-role-profile-delete-me"
+  name = "ec2-profile-delete-me"
   role = aws_iam_role.ec2_role.name
 }
