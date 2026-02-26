@@ -54,8 +54,8 @@ GITHUB_TOKEN=$(aws secretsmanager get-secret-value \
 
 cd /home/ubuntu
 
-git clone https://${GITHUB_TOKEN}@github.com/your-username/your-private-repo.git
+git clone https://${GITHUB_TOKEN}@github.com/Varaprasad4127/k8s_assignment.git
 
-chown -R ubuntu:ubuntu your-private-repo
+chown -R ubuntu:ubuntu k8s_assignment
 
 echo "Bootstrap completed successfully."
