@@ -11,7 +11,7 @@ terraform {
   backend "s3" {
     bucket         = "backend-s3-delete-me"
     key            = "k8s/terraform.tfstate"
-    region         = "ap-south-2"
+    region         = "eu-central-1"
     encrypt        = true
   }
 }

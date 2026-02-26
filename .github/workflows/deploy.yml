@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: ap-south-2
+  AWS_REGION: eu-central-1
   TF_VAR_public_key: ${{ secrets.TF_PUBLIC_KEY }}
 
 jobs:

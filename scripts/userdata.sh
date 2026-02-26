@@ -39,7 +39,7 @@ install minikube-linux-amd64 /usr/local/bin/minikube
 # 🔐 Fetch GitHub token from Secrets Manager
 ############################################
 
-REGION="ap-south-2"
+REGION="eu-central-1"
 SECRET_NAME="github-token-delete-me"
 
 GITHUB_TOKEN=$(aws secretsmanager get-secret-value \

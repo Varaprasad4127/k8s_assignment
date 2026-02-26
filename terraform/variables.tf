@@ -1,6 +1,6 @@
 variable "aws_region" {
   description = "AWS region to deploy EC2"
-  default     = "ap-south-2"
+  default     = "eu-central-1"
 }
 
 variable "aws_account_id" {
