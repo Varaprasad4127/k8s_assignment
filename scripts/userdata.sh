@@ -1,8 +1,20 @@
 #!/bin/bash
-# Update and install dependencies
-apt update -y && apt upgrade -y
-apt install -y curl apt-transport-https conntrack socat docker.io
+set -e
 
+echo "Starting EC2 bootstrap..."
+# Update system
+sudo apt-get update -y
+sudo apt-get upgrade -y
+
+# Install required packages
+sudo apt-get install -y \
+  curl \
+  apt-transport-https \
+  ca-certificates \
+  conntrack \
+  socat \
+  docker.io
+  
 # Enable Docker
 systemctl enable docker
 systemctl start docker

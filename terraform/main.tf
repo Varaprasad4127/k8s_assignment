@@ -5,7 +5,7 @@ resource "aws_instance" "k8s_node" {
   key_name               = aws_key_pair.test_key.key_name
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
-  user_data = file("userdata.sh")
+  user_data = file("../scripts/userdata.sh")
 
   tags = {
     Name = "terraform-k8s-node-delete-me"
