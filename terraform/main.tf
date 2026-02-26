@@ -3,6 +3,7 @@ resource "aws_instance" "k8s_node" {
   instance_type          = var.instance_type
   subnet_id              = var.subnet_id
   key_name               = aws_key_pair.test_key.key_name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_role_profile.name
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
   user_data = file("../scripts/userdata.sh")
