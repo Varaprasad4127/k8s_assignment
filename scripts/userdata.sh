@@ -46,7 +46,7 @@ GITHUB_TOKEN=$(aws secretsmanager get-secret-value \
   --region $REGION \
   --secret-id $SECRET_NAME \
   --query SecretString \
-  --output text | jq -r '.token')
+  --output text | jq -r '.GITHUB_TOKEN')
 
 ############################################
 # 📦 Clone Private Repo
