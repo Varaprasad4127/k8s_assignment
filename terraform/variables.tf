@@ -3,6 +3,12 @@ variable "aws_region" {
   default     = "ap-south-2"
 }
 
+variable "aws_account_id" {
+  description = "AWS account ID where the secret is stored"
+  type        = string
+  default.    = "743298170833"
+}
+
 variable "instance_type" {
   description = "EC2 instance type"
   default     = "t3.medium"
