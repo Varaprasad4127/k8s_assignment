@@ -23,7 +23,7 @@ resource "aws_iam_policy" "secrets_policy" {
       {
         Effect   = "Allow",
         Action   = ["secretsmanager:GetSecretValue"],
-        Resource = "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_id}:secret:github-token-*"
+        Resource = "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_id}:secret:github-token-delete-me"
       }
     ]
   })
