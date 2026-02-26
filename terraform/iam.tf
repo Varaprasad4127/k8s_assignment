@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "ec2_assume_role" {
 
 # Create the IAM Role
 resource "aws_iam_role" "ec2_role" {
-  name               = "ec2-github-access-role-delete-me"
+  name               = "ec2-github-role-delete-me"
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 }
 

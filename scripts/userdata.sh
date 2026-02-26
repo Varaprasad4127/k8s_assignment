@@ -13,7 +13,10 @@ sudo apt-get install -y \
   ca-certificates \
   conntrack \
   socat \
-  docker.io
+  docker.io \
+  awscli \
+  jq \
+  git
   
 # Enable Docker
 systemctl enable docker
@@ -30,3 +33,29 @@ mv kubectl /usr/local/bin/
 # Install Minikube
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 install minikube-linux-amd64 /usr/local/bin/minikube
+
+
+############################################
+# 🔐 Fetch GitHub token from Secrets Manager
+############################################
+
+REGION="ap-south-2"
+SECRET_NAME="github-token-delete-me"
+
+GITHUB_TOKEN=$(aws secretsmanager get-secret-value \
+  --region $REGION \
+  --secret-id $SECRET_NAME \
+  --query SecretString \
+  --output text | jq -r '.token')
+
+############################################
+# 📦 Clone Private Repo
+############################################
+
+cd /home/ubuntu
+
+git clone https://${GITHUB_TOKEN}@github.com/your-username/your-private-repo.git
+
+chown -R ubuntu:ubuntu your-private-repo
+
+echo "Bootstrap completed successfully."
