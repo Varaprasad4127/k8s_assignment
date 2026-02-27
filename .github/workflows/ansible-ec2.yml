@@ -1,0 +1,52 @@
+name: Run Ansible on EC2 Linux
+
+on:
+  workflow_dispatch:
+    inputs:
+      roles:
+        description: 'Comma-separated roles to run (e.g., minikube,docker_build,k8s_deployment)'
+        required: true
+        default: 'all'
+
+jobs:
+  run-ansible:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout workflow repo (not strictly needed if only SSHing)
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # Step 2: Set roles variable
+      - name: Set roles to run
+        id: set_roles
+        run: |
+          if [ "${{ github.event.inputs.roles }}" == "all" ]; then
+            echo "ROLES=minikube,docker_build,k8s_deployment,k8s_service,k8s_ingress,hpa" >> $GITHUB_ENV
+          else
+            echo "ROLES=${{ github.event.inputs.roles }}" >> $GITHUB_ENV
+          fi
+
+      # Step 3: Pull latest repo on EC2 (optional but recommended)
+      - name: Pull latest repo on EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/project
+            git pull || echo "Repo already up to date"
+
+      # Step 4: Run Ansible playbook on EC2
+      - name: Run Ansible roles on EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/project/ansible
+            ansible-playbook -i inventory.ini main.yml --tags $ROLES

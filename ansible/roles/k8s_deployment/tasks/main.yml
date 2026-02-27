@@ -1,6 +1,9 @@
+---
 - name: Apply Deployment manifest
   k8s:
     kubeconfig: /home/ubuntu/.kube/config
     state: present
     definition: "{{ lookup('file', 'k8s/deployment.yaml') }}"
+  become: yes
+  become_user: ubuntu
   tags: deployment

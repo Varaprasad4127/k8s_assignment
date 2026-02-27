@@ -13,4 +13,6 @@
   args:
     chdir: /home/ubuntu/k8s_assignment
     executable: /bin/bash
+  become: yes
+  become_user: ubuntu
   tags: docker

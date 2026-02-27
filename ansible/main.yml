@@ -1,7 +1,9 @@
 ---
 - name: EC2 Kubernetes Orchestration
   hosts: ec2
+  remote_user: ubuntu   # or ubuntu
   become: yes
+
 
   roles:
     - minikube
