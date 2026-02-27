@@ -109,11 +109,25 @@ sudo -u ubuntu ./config.sh --unattended --url $REPO_URL --token $RUNNER_TOKEN --
 
 echo "GitHub Actions runner installed and service started successfully."
 echo "Ansible installed and ready."
+
+############################################
+# 🧹 Clean up temporary/executable files
+############################################
+
+# Remove downloaded tarballs and binaries that are no longer needed
+rm -f /home/ubuntu/k8s_assignment/minikube-linux-amd64
+rm -f /home/ubuntu/k8s_assignment/kubectl
+rm -f $RUNNER_DIR/actions-runner-linux-x64.tar.gz
+
+echo "Temporary installer files removed."
+
+############################################
+# 📋 Copy user-data logs for ubuntu user
+############################################
+
+cp /var/log/cloud-init-output.log /home/ubuntu/user-data.log
+chown ubuntu:ubuntu /home/ubuntu/user-data.log
+
+echo "User-data logs copied to /home/ubuntu/user-data.log"
+
 echo "Bootstrap completed successfully."
-
-
-############################################
-# Remove tarballs
-############################################
-cd /home/ubuntu
-rm actions-runner-linux-x64.tar.gz minikube-linux-amd64 kubectl
