@@ -1,22 +1,10 @@
-name: Deploy via Ansible
+name: Test Workflow
 
 on:
   workflow_dispatch:
-    inputs:
-      roles:
-        description: "Comma separated roles (example: minikube,docker,deployment)"
-        required: true
-        default: "minikube"
 
 jobs:
-  deploy:
+  test:
     runs-on: self-hosted
-
     steps:
-      - name: Print selected roles
-        run: echo "Running roles: ${{ github.event.inputs.roles }}"
-
-      - name: Run Ansible playbook
-        run: |
-          cd /home/ubuntu/k8s_assignment/ansible
-          ansible-playbook -i inventory.ini main.yml --tags "${{ github.event.inputs.roles }}"
+      - run: echo "Hello from runner"
