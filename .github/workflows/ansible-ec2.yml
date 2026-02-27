@@ -18,4 +18,4 @@ jobs:
       - name: Run Ansible
         run: |
           cd /home/ubuntu/k8s_assignment/ansible
-          ansible-playbook -i inventory.ini main.yml --tags "${{ github.event.inputs.roles }}"
+          ansible-playbook main.yml --tags "${{ github.event.inputs.roles }}" -i "localhost," --connection=local
