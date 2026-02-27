@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -xe
 
 echo "Starting EC2 bootstrap..."
 
@@ -83,8 +83,13 @@ mkdir -p $RUNNER_DIR
 chown ubuntu:ubuntu $RUNNER_DIR
 cd $RUNNER_DIR
 
-# Download and extract runner
-curl -o actions-runner-linux-x64.tar.gz -L https://github.com/actions/runner/releases/latest/download/actions-runner-linux-x64.tar.gz
+LATEST=$(curl -s https://api.github.com/repos/actions/runner/releases/latest | jq -r '.tag_name')
+
+RUNNER_VERSION=${LATEST#v}
+
+curl -L -o actions-runner-linux-x64.tar.gz \
+https://github.com/actions/runner/releases/download/${LATEST}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
+
 tar xzf actions-runner-linux-x64.tar.gz
 chown -R ubuntu:ubuntu $RUNNER_DIR
 
