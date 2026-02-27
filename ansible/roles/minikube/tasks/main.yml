@@ -1,0 +1,21 @@
+---
+- name: Check Minikube status
+  command: minikube status --output=json
+  register: minikube_status
+  failed_when: false
+  changed_when: false
+  tags: minikube
+
+- name: Start Minikube if not running
+  command: minikube start --driver=docker
+  when: minikube_status.rc != 0
+  tags: minikube
+
+- name: Ensure kubectl is configured
+  command: kubectl get nodes
+  register: kubectl_check
+  retries: 5
+  delay: 10
+  until: kubectl_check.rc == 0
+  changed_when: false
+  tags: minikube

@@ -57,3 +57,16 @@ resource "aws_key_pair" "test_key" {
   key_name   = "test_key_pair_delete_me"
   public_key = var.public_key
 }
+
+
+resource "aws_eip" "k8s_node_eip" {
+  domain = "vpc"
+  tags = {
+    Name = "minikube-eip-delete-me"
+  }
+}
+
+resource "aws_eip_association" "eip_association" {
+  instance_id   = aws_instance.k8s_node.id
+  allocation_id = aws_eip.k8s_node_eip.id
+}

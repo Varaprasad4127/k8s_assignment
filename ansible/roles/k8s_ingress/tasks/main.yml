@@ -1,0 +1,6 @@
+- name: Apply Ingress manifest
+  k8s:
+    kubeconfig: /home/ubuntu/.kube/config
+    state: present
+    definition: "{{ lookup('file', 'k8s/ingress.yaml') }}"
+  tags: ingress

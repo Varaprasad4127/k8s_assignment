@@ -1,0 +1,16 @@
+---
+- name: Ensure Docker service is running
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  tags: docker
+
+- name: Build Docker image inside Minikube
+  shell: |
+    eval $(minikube docker-env)
+    docker build -t hello-app:latest docker/
+  args:
+    chdir: /home/ubuntu/k8s_assignment
+    executable: /bin/bash
+  tags: docker

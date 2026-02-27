@@ -1,0 +1,11 @@
+---
+- name: EC2 Kubernetes Orchestration
+  hosts: ec2
+  become: yes
+
+  roles:
+    - minikube
+    - docker
+    - k8s_deploy
+    - hpa
+    - rbac

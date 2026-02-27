@@ -1,0 +1,6 @@
+- name: Apply HPA manifest
+  k8s:
+    kubeconfig: /home/ubuntu/.kube/config
+    state: present
+    definition: "{{ lookup('file', '/home/ubuntu/project/k8s/hpa.yaml') }}"
+  tags: hpa
