@@ -10,11 +10,10 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Show selected roles
+        run: echo "Running roles - ${{ github.event.inputs.roles }}"
 
-      - name: Install Ansible (if needed)
-        run: sudo apt-get update && sudo apt-get install -y ansible
-
-      - name: Run Ansible Playbook
-        run: ansible-playbook ./k8s_assignment/playbook.yml -i ./k8s_assignment/inventory
+      - name: Run Ansible
+        run: |
+          cd /home/ubuntu/k8s_assignment/ansible
+          ansible-playbook -i inventory.ini main.yml --tags "${{ github.event.inputs.roles }}"
