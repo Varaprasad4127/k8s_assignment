@@ -45,4 +45,6 @@ jobs:
           port: 22
           script: |
             cd /home/ubuntu/k8s_assignment/ansible
+            ROLES="${{ github.event.inputs.roles }}"
+            echo "Running roles: $ROLES"
             ansible-playbook -i inventory.ini main.yml --tags $ROLES
