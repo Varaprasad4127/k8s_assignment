@@ -24,7 +24,7 @@ resource "aws_security_group" "ec2_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["115.98.18.104/32"] # Replace with your IP for secure SSH access
+    cidr_blocks = ["115.98.166.19/32"] # Replace with your IP for secure SSH access
   }
 
   ingress {

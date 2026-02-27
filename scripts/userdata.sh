@@ -104,8 +104,8 @@ RUNNER_TOKEN=$(curl -s -X POST \
 sudo -u ubuntu ./config.sh --unattended --url $REPO_URL --token $RUNNER_TOKEN --replace
 
 # Install and start runner service
-sudo -u ubuntu ./svc.sh install
-sudo -u ubuntu ./svc.sh start
+./svc.sh install
+./svc.sh start
 
 echo "GitHub Actions runner installed and service started successfully."
 echo "Ansible installed and ready."
