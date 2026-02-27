@@ -1,50 +1,22 @@
-name: Run Ansible on EC2 Linux
+name: Deploy via Ansible
 
 on:
   workflow_dispatch:
     inputs:
       roles:
-        description: 'Comma-separated roles to run (e.g., minikube,docker_build,k8s_deployment)'
+        description: "Comma separated roles (example: minikube,docker,deployment)"
         required: true
-        default: 'all'
+        default: "minikube"
 
 jobs:
-  run-ansible:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Show selected roles
+        run: echo "Running roles: ${{ github.event.inputs.roles }}"
 
-      - name: Set roles to run
-        id: set_roles
+      - name: Run Ansible
         run: |
-          if [ "${{ github.event.inputs.roles }}" == "all" ]; then
-            echo "ROLES=minikube,docker_build,k8s_deployment,k8s_service,k8s_ingress,hpa" >> $GITHUB_ENV
-          else
-            echo "ROLES=${{ github.event.inputs.roles }}" >> $GITHUB_ENV
-          fi
-
-      - name: Pull latest repo on EC2
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.EC2_PUBLIC_IP }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          script: |
-            cd /home/ubuntu/k8s_assignment
-            git pull || echo "Repo already up to date"
-
-      - name: Run Ansible roles on EC2
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.EC2_PUBLIC_IP }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          script: |
-            cd /home/ubuntu/k8s_assignment/ansible
-            ROLES="${{ github.event.inputs.roles }}"
-            echo "Running roles: $ROLES"
-            ansible-playbook -i inventory.ini main.yml --tags $ROLES
+          cd /home/ubuntu/k8s_assignment/ansible
+          ansible-playbook -i inventory.ini main.yml --tags "${{ github.event.inputs.roles }}"
