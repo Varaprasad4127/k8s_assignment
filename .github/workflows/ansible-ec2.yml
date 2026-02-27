@@ -22,5 +22,5 @@ jobs:
         run: |
           pwd
           ls
-          cd /ansible
+          cd ansible/
           ansible-playbook main.yml --tags "${{ github.event.inputs.roles }}" -i "localhost," --connection=local
