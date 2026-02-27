@@ -11,7 +11,7 @@ variable "aws_account_id" {
 
 variable "instance_type" {
   description = "EC2 instance type"
-  default     = "t3.medium"
+  default     = "t3.large"
 }
 
 variable "vpc_id" {
