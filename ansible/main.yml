@@ -1,6 +1,6 @@
 ---
 - name: EC2 Kubernetes Orchestration
-  hosts: localhost
+  hosts: ec2
   connection: local
   gather_facts: yes
   become: yes
