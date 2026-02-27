@@ -5,5 +5,5 @@
   gather_facts: yes
   become: yes
   roles:
-    - minikube
-    - docker_build
+    - { role: minikube, tags: ['minikube'] }
+    - { role: docker_build, tags: ['docker_build'] }
