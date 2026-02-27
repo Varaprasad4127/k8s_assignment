@@ -7,7 +7,7 @@
 
   roles:
     - minikube
-    - docker
+    - docker_build
     - k8s_deploy
     - hpa
     - rbac
