@@ -1,10 +1,20 @@
-name: Test Workflow
+name: Deploy K8s Assignment
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  test:
+  deploy:
     runs-on: self-hosted
     steps:
-      - run: echo "Hello from runner"
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install Ansible (if needed)
+        run: sudo apt-get update && sudo apt-get install -y ansible
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook ./k8s_assignment/playbook.yml -i ./k8s_assignment/inventory
