@@ -13,11 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout workflow repo (not strictly needed if only SSHing)
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # Step 2: Set roles variable
       - name: Set roles to run
         id: set_roles
         run: |
@@ -27,7 +25,6 @@ jobs:
             echo "ROLES=${{ github.event.inputs.roles }}" >> $GITHUB_ENV
           fi
 
-      # Step 3: Pull latest repo on EC2 (optional but recommended)
       - name: Pull latest repo on EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -36,10 +33,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd /home/ubuntu/project
+            cd /home/ubuntu/k8s_assignment
             git pull || echo "Repo already up to date"
 
-      # Step 4: Run Ansible playbook on EC2
       - name: Run Ansible roles on EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -48,5 +44,5 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd /home/ubuntu/project/ansible
+            cd /home/ubuntu/k8s_assignment/ansible
             ansible-playbook -i inventory.ini main.yml --tags $ROLES
