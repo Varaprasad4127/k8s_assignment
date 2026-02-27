@@ -7,7 +7,7 @@
   tags: minikube
 
 - name: Start Minikube if not running
-  command: minikube start --driver=docker --memory=1500mb
+  command: minikube start --driver=docker --memory=1800mb
   when: minikube_status.rc != 0
   tags: minikube
 
