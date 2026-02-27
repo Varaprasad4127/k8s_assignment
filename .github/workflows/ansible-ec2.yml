@@ -1,10 +1,12 @@
 name: Deploy K8s Assignment
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      roles:
+        description: "Comma separated roles (example: minikube,docker,deployment)"
+        required: true
+        default: "minikube"
 
 jobs:
   deploy:
