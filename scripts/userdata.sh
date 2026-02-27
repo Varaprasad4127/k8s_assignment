@@ -126,8 +126,3 @@ echo "Temporary installer files removed."
 ############################################
 
 cp /var/log/cloud-init-output.log /home/ubuntu/user-data.log
-chown ubuntu:ubuntu /home/ubuntu/user-data.log
-
-echo "User-data logs copied to /home/ubuntu/user-data.log"
-
-echo "Bootstrap completed successfully."
