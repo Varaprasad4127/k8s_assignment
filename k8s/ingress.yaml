@@ -6,9 +6,9 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
-  # tls:
-  #   - hosts:
-  #       - hello.local
+  tls:
+    - hosts:
+        - hello.world
   #     secretName: hello-app-tls
   rules:
     - host: hello.local
