@@ -14,7 +14,8 @@ COPY templates/ templates/
 COPY static/ static/
 
 # Switch to non-root user
-USER appuser
+RUN useradd -u 1001 -m appuser
+USER 1001
 
 EXPOSE 5000
 

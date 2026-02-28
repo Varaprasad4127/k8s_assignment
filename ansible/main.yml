@@ -3,6 +3,8 @@
   hosts: localhost
   connection: local
   gather_facts: yes
+  vars:
+    image_tag: "{{ lookup('env', 'IMAGE_TAG') | default('latest', true) }}"
   roles:
     - { role: minikube, tags: ['minikube'] }
     - { role: docker, tags: ['docker'] }

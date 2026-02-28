@@ -10,7 +10,7 @@
 - name: Build Docker image inside Minikube
   shell: |
     eval $(minikube docker-env)
-    docker build -t hello-app:latest docker/
+    docker build -t hello-app:{{ image_tag }} docker/
   args:
     chdir: /home/ubuntu/k8s_assignment
     executable: /bin/bash

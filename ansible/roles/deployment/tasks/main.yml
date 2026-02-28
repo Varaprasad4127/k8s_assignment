@@ -3,7 +3,7 @@
   k8s:
     kubeconfig: /home/ubuntu/.kube/config
     state: present
-    src: "{{ playbook_dir }}/../k8s/deployment.yaml"
+    definition: "{{ lookup('template', playbook_dir + '/../k8s/deployment.yaml.j2') | from_yaml }}"
   become: yes
   become_user: ubuntu
   tags: deployment

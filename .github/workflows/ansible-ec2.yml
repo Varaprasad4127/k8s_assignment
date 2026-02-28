@@ -1,4 +1,4 @@
-name: Ansible deploy EC2
+name: Ansible run ${{ github.event.inputs.roles }}
 
 on:
   workflow_dispatch:
@@ -26,11 +26,13 @@ jobs:
       - name: Show selected roles
         run: echo "Running roles - ${{ github.event.inputs.roles }}"
 
-      - name: Check docker access
-        run: |
-          id
-          groups
-          docker ps
+      - name: Set image tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Debug image tag
+        debug:
+          msg: "Using image tag: {{ image_tag }}"
+
       - name: Run Ansible
         run: |
           pwd
