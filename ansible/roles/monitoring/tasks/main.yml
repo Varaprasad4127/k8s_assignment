@@ -1,0 +1,28 @@
+---
+- name: Ensure monitoring namespace exists
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: monitoring
+    state: present
+  become: yes
+  become_user: ubuntu
+  tags: monitoring
+
+- name: Add Helm repos and update
+  command: >
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts &&
+    helm repo add grafana https://grafana.github.io/helm-charts &&
+    helm repo update
+  become: yes
+  become_user: ubuntu
+  tags: monitoring
+
+- name: Install Prometheus + Grafana via Helm
+  command: >
+    helm install prometheus prometheus-community/kube-prometheus-stack
+    --namespace monitoring
+    --wait
+  become: yes
+  become_user: ubuntu
+  tags: monitoring
