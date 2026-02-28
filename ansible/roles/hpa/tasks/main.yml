@@ -1,4 +1,11 @@
 ---
+- name: Enable Minikube metrics-server addon
+  command: minikube addons enable metrics-server
+  become: yes
+  become_user: ubuntu
+  tags: metrics
+  args:
+    creates: /tmp/minikube-metrics-server-enabled
 - name: Apply HPA manifest
   k8s:
     kubeconfig: /home/ubuntu/.kube/config
