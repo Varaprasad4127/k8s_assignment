@@ -1,4 +1,11 @@
 ---
+- name: Enable Minikube ingress addon
+  command: minikube addons enable ingress
+  become: yes
+  become_user: ubuntu
+  tags: ingress
+  args:
+    creates: /tmp/minikube-ingress-enabled
 - name: Apply Ingress manifest
   k8s:
     kubeconfig: /home/ubuntu/.kube/config
