@@ -4,6 +4,7 @@
     name: docker
     state: started
     enabled: yes
+  become: yes
   tags: docker
 
 - name: Build Docker image inside Minikube

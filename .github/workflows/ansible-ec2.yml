@@ -1,4 +1,4 @@
-name: Deploy K8s Assignment
+name: Ansible deploy EC2
 
 on:
   workflow_dispatch:
@@ -35,4 +35,5 @@ jobs:
           pwd
           ls
           cd ansible/
+          whoami
           ansible-playbook main.yml --tags "${{ github.event.inputs.roles }}" -i "localhost," --connection=local
