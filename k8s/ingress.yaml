@@ -3,13 +3,10 @@ kind: Ingress
 metadata:
   name: hello-app-ingress
   namespace: my-app
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"   # disable for testing
 spec:
   ingressClassName: nginx
   rules:
-    - host: hello.world
-      http:
+    - http:
         paths:
           - path: /
             pathType: Prefix
