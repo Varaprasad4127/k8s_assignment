@@ -7,5 +7,8 @@
   become_user: ubuntu
   roles:
     - { role: minikube, tags: ['minikube'] }
-    - { role: docker_build, tags: ['docker_build'] }
+    - { role: docker, tags: ['docker'] }
     - { role: deployment, tags: ['deployment'] }
+    - { role: service, tags: ['service'] }
+    - { role: ingress, tags: ['ingress'] }
+    - { role: hpa, tags: ['hpa'] }
