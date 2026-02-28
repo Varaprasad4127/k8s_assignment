@@ -65,6 +65,9 @@ resource "aws_key_pair" "test_key" {
 
 resource "aws_eip" "k8s_node_eip" {
   domain = "vpc"
+  lifecycle {
+    prevent_destroy = true
+  }
   tags = {
     Name = "minikube-eip-delete-me"
   }
