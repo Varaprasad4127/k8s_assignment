@@ -1,5 +1,5 @@
 name: Ansible Deploy EC2
-run-name: Ansible run - ${{ github.event.inputs.roles }}
+run-name: Ansible run - ${{ inputs.roles }}
 
 on:
   workflow_dispatch:
