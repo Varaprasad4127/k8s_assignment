@@ -6,7 +6,7 @@ resource "aws_instance" "k8s_node" {
   iam_instance_profile   = aws_iam_instance_profile.ec2_role_profile.name
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
-  user_data = file("../scripts/userdata.sh")
+  user_data = file("../bash/userdata.sh")
   root_block_device {
     volume_type           = "gp3"
     volume_size           = 30
