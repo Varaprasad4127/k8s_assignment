@@ -6,6 +6,46 @@
   tags: ingress
   args:
     creates: /tmp/minikube-ingress-enabled
+
+- name: Create directory for TLS certificates
+  file:
+    path: /tmp/hello-app-tls
+    state: directory
+  become: yes
+  become_user: ubuntu
+  tags: ingress
+
+- name: Generate self-signed TLS certificate
+  command: >
+    openssl req -x509 -nodes -days 365
+    -newkey rsa:2048
+    -keyout /tmp/hello-app-tls/hello-app.key
+    -out /tmp/hello-app-tls/hello-app.crt
+    -subj "/CN=adbsafegate.helloworld.com/O=hello-app"
+  args:
+    creates: /tmp/hello-app-tls/hello-app.crt
+  become: yes
+  become_user: ubuntu
+  tags: ingress
+
+- name: Create Kubernetes TLS secret for Ingress
+  kubernetes.core.k8s:
+    kubeconfig: /home/ubuntu/.kube/config
+    state: present
+    namespace: my-app
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: hello-app-tls
+      type: kubernetes.io/tls
+      data:
+        tls.crt: "{{ lookup('file', '/tmp/hello-app-tls/hello-app.crt') | b64encode }}"
+        tls.key: "{{ lookup('file', '/tmp/hello-app-tls/hello-app.key') | b64encode }}"
+  become: yes
+  become_user: ubuntu
+  tags: ingress
+
 - name: Apply Ingress manifest
   k8s:
     kubeconfig: /home/ubuntu/.kube/config
