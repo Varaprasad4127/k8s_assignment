@@ -22,7 +22,12 @@ apt-get install -y \
   git \
   unzip \
   python3-pip \
-  software-properties-common
+  software-properties-common \
+  apache2-utils
+
+# Upgrade pip and install Kubernetes Python client
+python3 -m pip install --upgrade pip
+python3 -m pip install kubernetes
 
 # Enable Docker
 systemctl enable docker
@@ -126,3 +131,4 @@ echo "Temporary installer files removed."
 ############################################
 
 cp /var/log/cloud-init-output.log /home/ubuntu/user-data.log
+echo "Bootstrap completed"
