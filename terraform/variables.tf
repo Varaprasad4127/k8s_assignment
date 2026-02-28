@@ -36,3 +36,9 @@ variable "public_key" {
   type        = string
   default     = null
 }
+
+variable "my_mac_ip" {
+  description = "CIDR block allowed for SSH, HTTP and HTTPS access"
+  type        = string
+  default     = "115.98.166.19/32"
+}
