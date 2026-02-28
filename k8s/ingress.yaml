@@ -4,17 +4,21 @@ metadata:
   name: hello-app-ingress
   namespace: my-app
   annotations:
-    kubernetes.io/ingress.class: "nginx"               # Make sure your cluster has nginx ingress installed
-    nginx.ingress.kubernetes.io/rewrite-target: /      # Strip custom path before forwarding to service
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  tls:
+  - hosts:
+    - adbsafegate.helloworld.com
+    secretName: hello-app-tls
   rules:
-  - host: adbsafegate.helloworld.com                            # Replace with your domain or IP for testing
+  - host: adbsafegate.helloworld.com
     http:
       paths:
-      - path: /                              # Replace with the path you want
+      - path: /
         pathType: Prefix
         backend:
           service:
-            name: hello-app-service                          # Your existing ClusterIP service
+            name: hello-app-service
             port:
-              number: 80                               # The port exposed by your service
+              number: 80
