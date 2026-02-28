@@ -15,6 +15,7 @@ on:
           - service
           - ingress
           - hpa
+          - monitoring
         default: "all"
 
 jobs:

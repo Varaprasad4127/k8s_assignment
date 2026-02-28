@@ -12,3 +12,4 @@
     - { role: service, tags: ['service'] }
     - { role: ingress, tags: ['ingress'] }
     - { role: hpa, tags: ['hpa'] }
+    - { role: monitoring, tags: ['monitoring'] }

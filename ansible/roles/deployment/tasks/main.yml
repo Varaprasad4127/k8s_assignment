@@ -1,9 +1,19 @@
 ---
+- name: Creating namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: my-app
+    state: present
+  become: yes
+  become_user: ubuntu
+  tags: deployment
+
 - name: Apply Deployment manifest
   k8s:
     kubeconfig: /home/ubuntu/.kube/config
     state: present
-    definition: "{{ lookup('template', playbook_dir + '/../k8s/deployment.yaml.j2') | from_yaml_all | list }}"
+    definition: "{{ lookup('template', playbook_dir + '/../k8s/deployment.yaml.j2') | from_yaml_all }}"
   become: yes
   become_user: ubuntu
   tags: deployment
