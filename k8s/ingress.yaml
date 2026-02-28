@@ -3,13 +3,9 @@ kind: Ingress
 metadata:
   name: hello-app-ingress
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"   # disable for testing
 spec:
   ingressClassName: nginx
-  tls:
-    - hosts:
-        - hello.world
-  #     secretName: hello-app-tls
   rules:
     - host: hello.local
       http:
