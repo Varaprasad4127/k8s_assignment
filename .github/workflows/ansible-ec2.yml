@@ -6,6 +6,7 @@ on:
       roles:
         description: "Comma separated roles (example: minikube,docker,deployment)"
         required: true
+        type: choice
         options:
           - minikube
           - docker
