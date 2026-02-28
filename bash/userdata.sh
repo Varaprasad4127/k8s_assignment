@@ -55,6 +55,22 @@ apt-get install -y ansible
 ansible --version
 
 ############################################
+# 📦 Install Helm
+############################################
+HELM_VERSION="v3.12.0"
+
+# Download and extract Helm
+curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -o /tmp/helm.tar.gz
+tar -xzf /tmp/helm.tar.gz -C /tmp
+
+# Move Helm binary to /usr/local/bin
+mv /tmp/linux-amd64/helm /usr/local/bin/helm
+chmod +x /usr/local/bin/helm
+
+# Verify installation
+helm version
+
+############################################
 # 🔐 Fetch GitHub secrets
 ############################################
 

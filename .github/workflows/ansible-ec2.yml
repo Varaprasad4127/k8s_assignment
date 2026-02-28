@@ -35,8 +35,5 @@ jobs:
 
       - name: Run Ansible
         run: |
-          pwd
-          ls
           cd ansible/
-          whoami
           ansible-playbook main.yml --tags "${{ github.event.inputs.roles }}" -i "localhost," --connection=local
