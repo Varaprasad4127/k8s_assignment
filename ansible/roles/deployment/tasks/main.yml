@@ -3,7 +3,5 @@
   k8s:
     kubeconfig: /home/ubuntu/.kube/config
     state: present
-    definition: "{{ playbook_dir }}/../k8s/deployment.yaml"
-  become: yes
-  become_user: ubuntu
+    src: "{{ playbook_dir }}/../k8s/deployment.yaml"
   tags: deployment

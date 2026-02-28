@@ -6,7 +6,14 @@ on:
       roles:
         description: "Comma separated roles (example: minikube,docker,deployment)"
         required: true
-        default: "minikube"
+        options:
+          - minikube
+          - docker
+          - deployment
+          - service
+          - ingress
+          - hpa
+        default: "all"
 
 jobs:
   deploy:
