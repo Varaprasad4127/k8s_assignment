@@ -3,7 +3,7 @@
   k8s:
     kubeconfig: /home/ubuntu/.kube/config
     state: present
-    definition: "{{ lookup('file', 'k8s/hpa.yaml') }}"
+    src: "{{ playbook_dir }}/../k8s/hpa.yaml"
   become: yes
   become_user: ubuntu
   tags: hpa
