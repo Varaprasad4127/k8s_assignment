@@ -3,15 +3,18 @@ kind: Ingress
 metadata:
   name: hello-app-ingress
   namespace: my-app
+  annotations:
+    kubernetes.io/ingress.class: "nginx"               # Make sure your cluster has nginx ingress installed
+    nginx.ingress.kubernetes.io/rewrite-target: /      # Strip custom path before forwarding to service
 spec:
-  ingressClassName: nginx
   rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: hello-app-service
-                port:
-                  number: 80
+  - host: myapp.helloworld.com                            # Replace with your domain or IP for testing
+    http:
+      paths:
+      - path: /                              # Replace with the path you want
+        pathType: Prefix
+        backend:
+          service:
+            name: hello-app                            # Your existing ClusterIP service
+            port:
+              number: 80                               # The port exposed by your service
