@@ -4,11 +4,15 @@
   register: minikube_status
   failed_when: false
   changed_when: false
+  become: yes
+  become_user: ubuntu
   tags: minikube
 
 - name: Start Minikube if not running
   command: minikube start --driver=docker --cpus=3 --memory=6144mb
   when: minikube_status.rc != 0
+  become: yes
+  become_user: ubuntu
   tags: minikube
 
 - name: Ensure kubectl is configured
@@ -18,4 +22,6 @@
   delay: 10
   until: kubectl_check.rc == 0
   changed_when: false
+  become: yes
+  become_user: ubuntu
   tags: minikube
