@@ -8,13 +8,13 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /      # Strip custom path before forwarding to service
 spec:
   rules:
-  - host: myapp.helloworld.com                            # Replace with your domain or IP for testing
+  - host: adbsafegate.helloworld.com                            # Replace with your domain or IP for testing
     http:
       paths:
       - path: /                              # Replace with the path you want
         pathType: Prefix
         backend:
           service:
-            name: hello-app                            # Your existing ClusterIP service
+            name: hello-app-service                          # Your existing ClusterIP service
             port:
               number: 80                               # The port exposed by your service
