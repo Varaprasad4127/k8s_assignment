@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: hello-app
-          image: hello-app:{{ image_tag }}
+          image: "hello-app:{{ image_tag }}"
           imagePullPolicy: Never
           ports:
             - name: http
