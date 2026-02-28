@@ -9,11 +9,20 @@
   become_user: ubuntu
   tags: monitoring
 
-- name: Add Helm repos and update
-  command: >
-    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts &&
-    helm repo add grafana https://grafana.github.io/helm-charts &&
-    helm repo update
+- name: Add Prometheus Helm repo
+  command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  become: yes
+  become_user: ubuntu
+  tags: monitoring
+
+- name: Add Grafana Helm repo
+  command: helm repo add grafana https://grafana.github.io/helm-charts
+  become: yes
+  become_user: ubuntu
+  tags: monitoring
+
+- name: Update Helm repos
+  command: helm repo update
   become: yes
   become_user: ubuntu
   tags: monitoring
