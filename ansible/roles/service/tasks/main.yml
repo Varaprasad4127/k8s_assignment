@@ -7,3 +7,9 @@
   become: yes
   become_user: ubuntu
   tags: service
+
+- name: Enable Minikube ingress addon
+  command: minikube addons enable ingress
+  become: yes
+  become_user: ubuntu
+  tags: service
