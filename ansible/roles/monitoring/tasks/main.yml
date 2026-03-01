@@ -1,5 +1,5 @@
 ---
-- name: Ensure monitoring namespace exists
+- name: Create monitoring namespace
   kubernetes.core.k8s:
     api_version: v1
     kind: Namespace
@@ -27,10 +27,12 @@
   become_user: ubuntu
   tags: monitoring
 
-- name: Install Prometheus + Grafana via Helm
+- name: Install Prometheus + Grafana via Helm with NodePort
   command: >
-    helm install prometheus prometheus-community/kube-prometheus-stack
+    helm upgrade --install prometheus prometheus-community/kube-prometheus-stack
     --namespace monitoring
+    --set grafana.service.type=NodePort
+    --set grafana.service.nodePort=32000
     --wait
   become: yes
   become_user: ubuntu
