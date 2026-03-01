@@ -4,8 +4,17 @@
   become: yes
   become_user: ubuntu
   tags: ingress
-  args:
-    creates: /tmp/minikube-ingress-enabled
+
+- name: Wait for ingress controller to be ready
+  shell: |
+    kubectl wait \
+      --namespace ingress-nginx \
+      --for=condition=available \
+      deployment/ingress-nginx-controller \
+      --timeout=180s
+  become: yes
+  become_user: ubuntu
+  tags: ingress
 
 - name: Create directory for TLS certificates
   file:

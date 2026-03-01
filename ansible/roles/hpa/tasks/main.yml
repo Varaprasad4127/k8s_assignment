@@ -4,8 +4,7 @@
   become: yes
   become_user: ubuntu
   tags: metrics
-  args:
-    creates: /tmp/minikube-metrics-server-enabled
+  
 - name: Apply HPA manifest
   k8s:
     kubeconfig: /home/ubuntu/.kube/config
