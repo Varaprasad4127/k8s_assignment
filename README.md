@@ -2,24 +2,21 @@
 
 Complete end-to-end deployment of a Kubernetes cluster with containerized Python Flask application using Terraform, Ansible, GitHub Actions, and shell scripts.
 
-**Status**: ✅ Production-Ready  
-**Created**: March 1, 2026
-
 ---
 
 ## 🎯 Assignment Overview
 
 This solution demonstrates a fully automated infrastructure deployment covering:
 
-- **Problem**: Deploy a Kubernetes cluster with a containerized application on AWS EC2
-- **Approach**: Infrastructure as Code (IaC) using Terraform, shell scripts for bootstrapping, Docker for containerization, and Ansible for orchestration
-- **Result**: Production-ready Kubernetes cluster with automated scaling, monitoring, and deployment pipelines
+- **Problem**: Deploy a Kubernetes cluster with a containerized application on a linux machine
+- **Approach**: Infrastructure as Code (IaC) using Terraform to create the Linux EC2, shell scripts for bootstrapping, Docker for containerization, and Ansible for orchestration and github Actions for deployment workflows.
+- **Result**: Production-ready Kubernetes cluster with automated scaling, monitoring, and deployment pipelines.
 
 **Components**:
 1. **Terraform** - AWS infrastructure provisioning (EC2, security groups, networking)
-2. **Bash (userdata.sh)** - EC2 instance bootstrap and initial setup
+2. **Bash** - EC2 instance bootstrap and initial setup downloading all the dependencies
 3. **Docker** - Application containerization with security best practices
-4. **Kubernetes** - Container orchestration (Deployment, Service, Ingress, HPA)
+4. **Kubernetes** - Container orchestration (Deployment, Service, Ingress, HPA, Monitoring)
 5. **Ansible** - Automated K8s resource management and deployment
 6. **GitHub Actions** - CI/CD workflows for automatic deployments
 
@@ -44,12 +41,13 @@ GitHub Repository
     │   Clone Repository from GitHub
     │   Setup GitHub Actions Runner
     │
-    ├─ [3] Kubernetes Cluster (Minikube)
+    ├─ [3] GitHub Actions (Ansible Workflow)
     │       ↓
-    │   Control Plane: API Server, Controller Manager, Scheduler
-    │
-    └─ [4] Ansible Playbooks (Setup Namespace + Resources)
+    │   Ansible Playbook
+    │       ↓
+    └─ [4] Ansible roles
             ↓
+        Minikube Role: Create minikube cluster
         Docker Role: Build & Push Image
         Deployment Role: Create K8s Deployment (2 replicas)
         Service Role: Expose via ClusterIP
@@ -58,188 +56,90 @@ GitHub Repository
         Monitoring Role: Deploy Prometheus/Grafana
 ```
 
-### Key Design Decisions
-
-| Decision | Why |
-|----------|-----|
-| **Terraform for IaC** | Declarative, version-controlled infrastructure, easy to replicate |
-| **Bash userdata.sh** | Simple, self-contained bootstrap (no external dependencies) |
-| **Minikube in EC2** | Lightweight K8s for testing (can scale to kubeadm/EKS in production) |
-| **Ansible for K8s** | Idempotent K8s resource management, easy to modify and rerun |
-| **GitHub Actions** | CI/CD integration, automatic triggers, workflow visibility |
-
 ---
 
 ## 🏢 Infrastructure Setup (Terraform)
 
-### What Terraform Provisioned
+**File**: `terraform/main.tf` - Provisions AWS infrastructure
 
-**File**: `terraform/main.tf`
+**Components created**:
+1. **EC2 Instance** (t3.2xlarge, Ubuntu 22.04 LTS)
+   - Launches with userdata.sh bootstrap script
+   - Runs in custom VPC/subnet
+   - IAM role with Secrets Manager permissions
 
-```hcl
-# 1. EC2 Instance
-resource "aws_instance" "k8s_node" {
-  ami                  = var.ami_id                    # Ubuntu 22.04 LTS
-  instance_type        = var.instance_type             # t3.2xlarge
-  subnet_id            = var.subnet_id                 # Custom VPC
-  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
-  iam_instance_profile = aws_iam_instance_profile.ec2_role_profile.name
-  
-  user_data = file("../bash/userdata.sh")  # Bootstrap script
-}
+2. **Security Group**
+   - Port 22 (SSH) - restricted to your IP
+   - Port 80 (HTTP) - restricted to your IP
+   - Port 443 (HTTPS) - restricted to your IP
 
-# 2. Security Group
-resource "aws_security_group" "ec2_sg" {
-  # Port 22: SSH (restricted to your IP)
-  # Port 80: HTTP (restricted to your IP)
-  # Port 443: HTTPS (restricted to your IP)
-}
+3. **SSH Key Pair** - Created to login to the EC2 from your local
 
-# 3. IAM Role
-resource "aws_iam_role" "ec2_role" {
-  # Permissions to:
-  # - Access AWS Secrets Manager (for GitHub token)
-  # - Read ECR repositories
-  # - CloudWatch logs
-}
-
-# 4. SSH Key Pair
-resource "aws_key_pair" "test_key" {
-  public_key = var.public_key  # Provided via GitHub Actions secrets
-}
-```
-
-### Terraform Variables
-
-**File**: `terraform/variables.tf`
-
-```hcl
-variable "instance_type"  # t3.2xlarge (8 vCPU, 32GB RAM)
-variable "vpc_id"         # Your VPC
-variable "subnet_id"      # Your Subnet
-variable "ami_id"         # Ubuntu 22.04 AMI
-variable "public_key"     # SSH key (from secrets)
-variable "my_mac_ip"      # Your IP for SSH access
-variable "aws_region"     # eu-central-1
-```
-
-### GitHub Actions Terraform Workflow
-
-**File**: `.github/workflows/deploy.yml`
-
-```yaml
-name: Terraform Apply
-
-on:
-  workflow_dispatch:  # Manual trigger (no automatic deployment)
-
-jobs:
-  terraform-apply:
-    runs-on: ubuntu-latest
-    steps:
-      1. Checkout repository
-      2. Setup Terraform v1.5.0
-      3. Configure AWS credentials (from secrets)
-      4. terraform init (download provider)
-      5. terraform apply -auto-approve (create infrastructure)
-```
-
-**How to Use**:
-1. Go to GitHub Actions tab
-2. Select "Terraform Apply" workflow
-3. Click "Run workflow"
-4. EC2 instance launches automatically
-5. Userdata.sh runs automatically on launch
-
-**What It Provides**:
-- Fully configured EC2 instance
-- All necessary tools pre-installed
-- Repository cloned
-- GitHub Actions runner ready
-- K8s cluster ready to use
+**GitHub Actions Workflow** (`.github/workflows/deploy.yml`)
+- **Trigger**: Manual (workflow_dispatch)
+- **Steps**: Checkout → Setup Terraform → AWS credentials → Init → Apply
+- **Result**: EC2 instance provisioned → userdata.sh runs automatically and Instance will launch with all dependencies pre-installed
 
 ---
 
 ## 💻 EC2 Bootstrap (Userdata)
 
-### What Is Userdata?
+**File**: `bash/userdata.sh` - Runs automatically on EC2 launch before login
 
-Shell script (`bash/userdata.sh`) that runs **automatically** when EC2 instance launches, before any user login. Single, self-contained bootstrap process.
+**Section 1: System Updates & Dependencies**
+- apt-get update/upgrade
+- Install: Docker, AWS CLI, Git, jq, Python tools
 
-### Userdata.sh Sections
+**Section 2: Docker Setup**
+- Enable & start Docker daemon
+- Add ubuntu user to docker group (no sudo needed)
+- Ready for container deployment
 
-#### 1. System Updates & Dependencies
+**Section 3: Kubernetes Tools**
+- kubectl (CLI)
+- Minikube (single-node cluster)
+- Helm (package manager)
 
-```bash
-apt-get update && apt-get upgrade -y
-apt-get install -y curl docker.io git awscli jq python3-pip
-```
+**Section 4: Ansible Installation**
+- Add Ansible PPA repository
+- Install Ansible package
+- Ready for infrastructure automation
 
-**Installs**: Docker, AWS CLI, Git, jq (JSON parser), Python tools
+**Section 5: GitHub Integration**
+- Fetch GitHub token from AWS Secrets Manager
+- Clone private repository
+- Setup GitHub Actions runner (listens for workflow jobs)
 
-#### 2. Docker Installation & Configuration
-
-```bash
-systemctl enable docker     # Start on boot
-systemctl start docker      # Start now
-usermod -aG docker ubuntu   # Let ubuntu user run docker (no sudo)
-```
-
-**Result**: Docker daemon running, ready for container deployment
-
-#### 3. Kubernetes Tools
-
-```bash
-# kubectl - Kubernetes CLI
-curl -LO https://dl.k8s.io/release/v1.28.3/bin/linux/amd64/kubectl
-
-# Minikube - Single-node K8s cluster
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-
-# Helm - Kubernetes package manager
-curl https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz
-```
-
-**Result**: Complete K8s toolset ready to use
-
-#### 4. Ansible Installation
-
-```bash
-apt-add-repository --yes --update ppa:ansible/ansible
-apt-get install -y ansible
-```
-
-**Result**: Ansible installed and ready for infrastructure automation
-
-#### 5. GitHub Integration
-
-```bash
-# Fetch GitHub token from AWS Secrets Manager
-GITHUB_TOKEN=$(aws secretsmanager get-secret-value \
-  --secret-id github-token-delete-me)
-
-# Clone private repository
-git clone https://${GITHUB_TOKEN}@github.com/Varaprasad4127/k8s_assignment.git
-
-# Setup GitHub Actions runner
-# (runner registration and configuration)
-```
-
-**Result**: 
-- Private repo cloned
-- GitHub Actions runner installed (listens for workflow jobs)
-- Ready to execute ansible playbooks from Actions
-
-#### 6. Setup Complete
-
-After userdata finishes (takes ~5-10 minutes):
-- ✅ Docker running
-- ✅ Kubernetes tools installed
-- ✅ Ansible ready
-- ✅ Repository cloned to `/home/ubuntu/k8s_assignment`
-- ✅ GitHub Actions runner listening
+**Section 6: Setup Complete** (~5-10 minutes)
+✅ Docker running | ✅ K8s tools ready | ✅ Ansible installed | ✅ GitHub runner listening
 
 **Next Step**: Manual trigger of Ansible workflow or manual SSH into instance to run playbooks
+
+---
+
+## ☸️ Minikube Startup (Ansible Role)
+
+The **minikube** Ansible role starts a single-node Kubernetes cluster on the EC2 instance.
+
+```bash
+# ansible/roles/minikube/tasks/main.yml
+minikube start --driver=docker --cpus=2 --memory=4096
+kubectl get nodes  # Verify cluster ready
+```
+
+**Configuration**:
+- **Driver**: Docker (lightweight, no VM overhead)
+- **CPU**: 3 cores
+- **Memory**: 6GB
+- **Startup time**: ~1 minute
+
+**Verification**:
+```bash
+minikube status
+kubectl get nodes
+```
+
+After this role completes, the cluster is ready for building Docker images and deploying applications.
 
 ---
 
@@ -302,162 +202,57 @@ CMD ["python", "app.py"]
 
 ### Building the Image
 
+The Docker image is built automatically by the **docker** Ansible role, which tags the image using the GitHub commit SHA for version control and traceability.
+
 ```bash
-# In the EC2 instance or locally
+# Ansible docker role builds and tags image
+# File: ansible/roles/docker/tasks/main.yml
+docker build -t hello-app:${COMMIT_SHA} docker/
 docker build -t hello-app:latest docker/
 
-# Ansible role handles this automatically
-# (docker/tasks/main.yml builds and pushes image)
+# COMMIT_SHA comes from GitHub Actions or environment
+# Example: hello-app:a3f9e7c2d1b5
 ```
+
+**How It Works**:
+1. GitHub Actions workflow passes `COMMIT_SHA` to Ansible
+2. Docker role uses SHA as primary tag
+3. Also tags as `latest` for convenient default reference
+5. Deployment uses specific SHA tag
+
+**Benefits**:
+- **Traceability**: Know exactly which commit produced which image
+- **Rollback**: Easy to revert to previous images
+- **Reproducibility**: Rebuild exact same image from commit SHA
+- **Safety**: `latest` tag always safe (linked to commit history)
 
 ---
 
 ## ☸️ Kubernetes Deployment
 
-### What Gets Deployed
-
 K8s manifests in `k8s/` directory:
 
-```
-k8s/
-├── deployment.yaml.j2     # 2 replicas of Flask app
-├── service.yaml          # ClusterIP load balancer
-├── ingress.yaml          # External HTTP/HTTPS routing
-└── hpa.yaml              # Auto-scaling (2-10 replicas)
-```
-
 ### Deployment (deployment.yaml.j2)
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hello-app
-  namespace: my-app  # Isolated namespace
-spec:
-  replicas: 2         # Always 2 pods running
-  
-  template:
-    spec:
-      containers:
-      - name: hello-app
-        image: hello-app:latest
-        imagePullPolicy: Never  # Use local image (Minikube)
-        
-        ports:
-        - containerPort: 5000
-        
-        resources:
-          requests:
-            cpu: "100m"          # Guaranteed minimum
-            memory: "128Mi"
-          limits:
-            cpu: "250m"          # Maximum allowed
-            memory: "256Mi"
-        
-        securityContext:
-          runAsNonRoot: true
-          allowPrivilegeEscalation: false
-        
-        # Health checks (Kubernetes probes)
-        livenessProbe:
-          httpGet: /health
-          initialDelaySeconds: 15
-          periodSeconds: 10
-        
-        readinessProbe:
-          httpGet: /health
-          initialDelaySeconds: 5
-          periodSeconds: 5
-```
-
-**What This Does**:
-- Ensures 2 replicas always running (auto-restart if crashed)
-- Resource limits prevent runaway consumption
-- Health checks enable automatic recovery
-- Non-root security context enforces principle of least privilege
+- **2 replicas** of Flask app running
+- **Resource limits**: 100m-250m CPU, 128Mi-256Mi memory
+- **Health checks**: Liveness & readiness probes on `/health` endpoint
+- **Security**: Runs as non-root user (UID 1001)
+- **Image**: Uses local Docker image (imagePullPolicy: Never for Minikube)
 
 ### Service (service.yaml)
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello-app-service
-  namespace: my-app
-spec:
-  type: ClusterIP  # Internal load balancer
-  selector:
-    app: hello-app  # Route to these pods
-  ports:
-  - port: 80
-    targetPort: 5000
-```
-
-**What This Does**:
-- Provides stable internal IP for load balancing
-- Routes traffic between 2 replicas
-- Exposed on port 80 internally
+- **Type**: ClusterIP (internal load balancer)
+- **Port mapping**: 80
+- **Routes traffic** between 2 pod replicas
 
 ### Ingress (ingress.yaml)
+- **Domain**: adbsafegate.helloworld.com
+- **TLS**: HTTPS with certificate
+- **Routes**: External traffic to service
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: hello-app-ingress
-  namespace: my-app
-spec:
-  rules:
-  - host: adbsafegate.helloworld.com
-    http:
-      paths:
-      - path: /
-        backend:
-          service:
-            name: hello-app-service
-            port:
-              number: 80
-  
-  tls:
-  - hosts:
-    - adbsafegate.helloworld.com
-    secretName: hello-app-tls
-```
-
-**What This Does**:
-- Routes external HTTPS traffic to service
-- Uses domain name routing
-- Requires TLS certificate (configured separately)
-
-### HPA (Horizontal Pod Autoscaler)
-
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: hello-app-hpa
-  namespace: my-app
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: hello-app
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 80
-```
-
-**What This Does**:
-- Scales pods from 2 to 10 based on CPU usage
-- If average CPU > 80%, add more pods
-- If CPU drops, remove pods (cost savings)
+### HPA (hpa.yaml)
+- **Min replicas**: 2, **Max**: 5
+- **Scale trigger**: CPU > 50% utilization
+- **Auto-scales** based on load
 
 ---
 
@@ -501,104 +296,15 @@ Ansible is an agentless configuration management tool that runs playbooks (YAML 
 
 Each role handles one aspect of the deployment:
 
-#### 1. **minikube/** Role
-- Starts Minikube cluster
-- Configures kubectl context
-- Verifies cluster is ready
-
-```bash
-# ansible/roles/minikube/tasks/main.yml
-- name: Start Minikube
-  shell: minikube start --driver=docker --cpus=2 --memory=4096
-
-- name: Wait for cluster
-  shell: kubectl get nodes
-```
-
-#### 2. **docker/** Role
-- Builds Docker image
-- Tags it appropriately
-- Optionally pushes to registry
-
-```bash
-# ansible/roles/docker/tasks/main.yml
-- name: Build Docker image
-  shell: |
-    eval $(minikube docker-env)
-    docker build -t hello-app:latest docker/
-```
-
-#### 3. **deployment/** Role
-- Creates namespace if needed
-- Applies deployment manifest
-- Waits for pods to be ready
-
-```bash
-# ansible/roles/deployment/tasks/main.yml
-- name: Create namespace
-  kubernetes.core.k8s:
-    name: my-app
-    api_version: v1
-    kind: Namespace
-    state: present
-
-- name: Deploy application
-  kubernetes.core.k8s:
-    state: present
-    definition: "{{ lookup('template', 'deployment.yaml.j2') }}"
-```
-
-#### 4. **service/** Role
-- Creates ClusterIP service
-- Configures load balancing
-- Maps ports correctly
-
-```bash
-- name: Create service
-  kubernetes.core.k8s:
-    state: present
-    definition: "{{ lookup('file', 'service.yaml') }}"
-```
-
-#### 5. **ingress/** Role
-- Enables NGINX ingress addon
-- Creates ingress resource
-- Configures hostname routing
-
-```bash
-- name: Enable NGINX ingress addon
-  shell: minikube addons enable ingress
-
-- name: Create ingress
-  kubernetes.core.k8s:
-    state: present
-    definition: "{{ lookup('file', 'ingress.yaml') }}"
-```
-
-#### 6. **hpa/** Role
-- Deploys Horizontal Pod Autoscaler
-- Sets min/max replicas
-- Configures CPU thresholds
-
-```bash
-- name: Create HPA
-  kubernetes.core.k8s:
-    state: present
-    definition: "{{ lookup('file', 'hpa.yaml') }}"
-```
-
-#### 7. **monitoring/** Role
-- Deploys Prometheus (metrics)
-- Deploys Grafana (visualization)
-- Sets up dashboards
-
-```bash
-- name: Add Prometheus repo
-  kubernetes.core.helm:
-    name: prometheus
-    chart_ref: prometheus-community/kube-prometheus-stack
-    release_namespace: monitoring
-```
+| Role | Purpose |
+|------|---------|
+| **minikube** | Start cluster, configure kubectl, verify ready |
+| **docker** | Build image with commit SHA tag |
+| **deployment** | Create namespace, deploy 2 replicas, wait for pods |
+| **service** | Create ClusterIP service, configure port mapping |
+| **ingress** | Enable NGINX addon, create ingress with TLS routing |
+| **hpa** | Deploy autoscaler (2-5 replicas, 50% CPU threshold) |
+| **monitoring** | Deploy Prometheus + Grafana, configure dashboards |
 
 ### Running Ansible Playbooks
 
@@ -629,69 +335,27 @@ See [GitHub Workflows](#github-workflows) section below
 
 **File**: `.github/workflows/deploy.yml`
 
-```yaml
-name: Terraform Apply
+**Purpose**: Provision AWS EC2 infrastructure with all dependencies pre-installed
 
-on:
-  workflow_dispatch:  # Manual trigger only
+**Steps**: Checkout → Setup Terraform → AWS credentials → Init → Apply
 
-jobs:
-  terraform-apply:
-    runs-on: ubuntu-latest
-    steps:
-      - Checkout code
-      - Setup Terraform
-      - Configure AWS credentials (from secrets)
-      - Terraform init
-      - Terraform apply
-```
+**Triggers**: Manual dispatch
 
-**When to Use**:
-- Provisioning new EC2 instance
-- Scaling infrastructure
-- Recreating everything from scratch
-
-**How to Trigger**:
-1. Go to GitHub repo → Actions tab
-2. Select "Terraform Apply" workflow
-3. Click "Run workflow"
-4. EC2 launches and userdata.sh runs automatically
+**Result**: EC2 instance (t3.2xlarge) launched with userdata.sh and secure networking configuration running automatically
 
 ---
 
-### Workflow 2: Ansible Deploy (Future)
+### Workflow 2: Ansible Deploy
 
-**Proposed**: `.github/workflows/ansible-deploy.yml`
+**File**: `.github/workflows/ansible-ec2.yml` 
 
-```yaml
-name: Ansible Deploy
+**Purpose**: Deploy Kubernetes resources and application updates automatically
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+**Triggers**: Manual dispatch
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - Checkout code
-      - Setup SSH key
-      - SSH into EC2
-      - Run Ansible playbooks
-      - Verify deployment
-```
+**Steps**: Checkout → Setup SSH key → SSH to EC2 → Run Ansible playbooks → Verify deployment
 
-**When to Use**:
-- Deploying new application version
-- Updating K8s manifests
-- Modifying infrastructure configuration
-- Scaling up/down manually
-
-**How to Trigger**:
-1. Push changes to main branch (automatic), OR
-2. Manual trigger from Actions tab
+**Result**: K8s cluster and application running (Minikube, Docker image, Deployment, Service, Ingress, HPA, Monitoring)
 
 ---
 
