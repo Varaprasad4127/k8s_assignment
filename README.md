@@ -266,7 +266,8 @@ Ansible is an agentless configuration management tool that runs playbooks (YAML 
 - Idempotent (safe to run multiple times)
 - No agents needed (just SSH + Python)
 - YAML syntax (easy to read and modify)
-- Can run from GitHub Actions workflows
+- Can run from GitHub Actions workflows via self-hosted runner on EC2
+- **Self-hosted runner approach**: GitHub Actions runner is installed on EC2 during userdata launch, allowing Ansible playbooks to execute locally without internet SSH exposure
 
 ### Ansible Structure
 
@@ -308,6 +309,14 @@ Each role handles one aspect of the deployment:
 
 ### Running Ansible Playbooks
 
+**Why GitHub Runner on EC2?**
+
+Instead of running workflows on GitHub's hosted runners (which requires exposing EC2 via SSH to the internet), we install a self-hosted GitHub Actions runner on the EC2 instance itself. This allows:
+- **Ansible runs locally** on EC2 (no SSH needed from internet)
+- **More secure** - no public internet access required
+- **Easier management** - no need to manage SSH keys from external systems
+- **Better performance** - no network latency between runner and K8s cluster
+
 **Manually (from EC2 instance)**:
 ```bash
 cd k8s_assignment/ansible
@@ -318,7 +327,7 @@ ansible-playbook main.yml --tags docker,deployment
 ```
 
 **Via GitHub Actions** (recommended):
-See [GitHub Workflows](#github-workflows) section below
+Self-hosted runner on EC2 executes Ansible playbooks locally
 
 ---
 
