@@ -5,13 +5,25 @@
   become_user: ubuntu
   tags: ingress
 
-- name: Wait for ingress controller to be ready
+- name: Wait for ingress admission webhook to be ready
   shell: |
     kubectl wait \
       --namespace ingress-nginx \
       --for=condition=available \
       deployment/ingress-nginx-controller \
       --timeout=180s
+
+    kubectl wait \
+      --namespace ingress-nginx \
+      --for=condition=complete \
+      job/ingress-nginx-admission-create \
+      --timeout=180s || true
+
+    kubectl wait \
+      --namespace ingress-nginx \
+      --for=condition=complete \
+      job/ingress-nginx-admission-patch \
+      --timeout=180s || true
   become: yes
   become_user: ubuntu
   tags: ingress
