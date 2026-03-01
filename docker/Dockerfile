@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 # Create non-root user
-RUN useradd -m appuser
+RUN useradd -u 1001 -m appuser
 
 WORKDIR /app
 
@@ -14,7 +14,6 @@ COPY templates/ templates/
 COPY static/ static/
 
 # Switch to non-root user
-RUN useradd -u 1001 -m appuser
 USER 1001
 
 EXPOSE 5000
