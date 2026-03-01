@@ -1,4 +1,10 @@
 ---
+- name: Enable Minikube metrics-server addon
+  command: minikube addons enable metrics-server
+  become: yes
+  become_user: ubuntu
+  tags: monitoring
+
 - name: Create monitoring namespace
   kubernetes.core.k8s:
     api_version: v1

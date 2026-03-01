@@ -14,8 +14,8 @@ on:
           - deployment
           - service
           - ingress
-          - hpa
           - monitoring
+          - hpa
         default: "all"
 
 jobs:
