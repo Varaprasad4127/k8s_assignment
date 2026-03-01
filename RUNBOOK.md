@@ -1,26 +1,15 @@
 # Runbook: Deploy & Access (GitHub → EC2 → Minikube → App)
 
-Purpose: concise, interview-ready runbook describing the exact demo steps to deploy the system from GitHub, verify it from inside the EC2 instance, and access the app locally.
-
----
-
-## Quick Architecture Summary
-- GitHub Actions (Terraform) provisions an EC2 instance and runs `user-data` to install Docker/kubectl/minikube/Ansible and register a self-hosted GitHub runner on the EC2.
-- GitHub Actions (Ansible workflows) run on that self-hosted runner and perform the Minikube + Docker + K8s resource deployments.
-- Access paths:
-  - From EC2: use `kubectl` / `minikube` directly.
-  - From local machine: use SSH port-forwarding to access Minikube services/dashboards and map the ingress host to `127.0.0.1`.
-
----
+Step-by-step demonstration of deploying the Kubernetes cluster and accessing the automated application with visual results.
 
 ## Prerequisites (on your laptop)
 - SSH private key matching the public key supplied to Terraform (`TF_PUBLIC_KEY`).
-- GitHub repo configured with required secrets (AWS credentials, TF public key, GitHub token in Secrets Manager).
+- GitHub repo configured with required secrets (AWS credentials, TF public key).
 - Local `ssh` and `kubectl` installed for port-forwarding and verification.
 
 ---
 
-## High-level Run Steps
+## Overview of Run Steps
 1. Trigger GitHub Terraform workflow (creates EC2 and runs `user-data`).
 2. Wait for userdata to finish; obtain EC2 public IP.
 3. SSH into the EC2 instance from your laptop.
@@ -88,7 +77,9 @@ Expected: `minikube` Ready.
 ---
 
 ### 5) Build Docker image in Minikube Docker env (docker role)
-Trigger (recommended via GitHub Ansible workflow):
+Preferred: trigger the Ansible Docker workflow in GitHub so the self-hosted runner on EC2 executes it.
+
+Manual on EC2 (if preferred):
 ```bash
 ansible-playbook main.yml --tags docker
 ```
@@ -105,20 +96,23 @@ Expected: `hello-app:${COMMIT_SHA}` and `hello-app:latest` exist.
 ### 6) View Minikube dashboard and port-forward to local
 Get dashboard URL (or start it):
 ```bash
-minikube dashboard --url &
+minikube dashboard --url
 ```
-If it prints `http://<MINIKUBE_IP>:<PORT>`, forward that port locally:
+If it prints `http://127.0.0.1:<DASHBOARD_PORT>/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/`, forward that port locally:
 
 ```bash
 # From local laptop
-ssh -i ~/.ssh/<your-key>.pem -L 30000:<MINIKUBE_IP>:<DASHBOARD_PORT> ubuntu@<EC2_PUBLIC_IP>
-# open http://localhost:30000 in the browser
+ssh -i ~/.ssh/<your-key>.pem -L <DASHBOARD_PORT>:127.0.0.1:<DASHBOARD_PORT> ubuntu@<EC2_PUBLIC_IP>
 ```
+Now you will be able to access that url from your local browser
 Or, on EC2 run `kubectl port-forward` for the dashboard and tunnel the same port.
 
 ---
 
 ### 7) Run deployment role and verify
+Preferred: trigger the Ansible Deployment workflow in GitHub so the self-hosted runner on EC2 executes it.
+
+Manual on EC2 (if preferred):
 ```bash
 ansible-playbook main.yml --tags deployment
 ```
@@ -132,6 +126,9 @@ Expected: `hello-app` deployment present with 2 Running pods.
 ---
 
 ### 8) Run service role and verify
+Preferred: trigger the Ansible Service workflow in GitHub so the self-hosted runner on EC2 executes it.
+
+Manual on EC2 (if preferred):
 ```bash
 ansible-playbook main.yml --tags service
 kubectl get svc -n my-app
@@ -142,6 +139,9 @@ Expected: ClusterIP present, mapping 80→5000.
 ---
 
 ### 9) Run ingress role and verify access
+Preferred: trigger the Ansible Ingress workflow in GitHub so the self-hosted runner on EC2 executes it.
+
+Manual on EC2 (if preferred):
 ```bash
 ansible-playbook main.yml --tags ingress
 kubectl get ingress -n my-app
@@ -153,8 +153,7 @@ kubectl get svc -n ingress-nginx
 ```
 Forward ingress to local:
 ```bash
-ssh -i ~/.ssh/<key>.pem -L 8080:<MINIKUBE_IP>:80 ubuntu@<EC2_PUBLIC_IP>
-# open http://localhost:8080
+ssh -i ~/.ssh/<key>.pem -L 8443:<MINIKUBE_IP>:<NODEPORT> ubuntu@<EC2_PUBLIC_IP>
 ```
 
 ---
@@ -165,11 +164,14 @@ Edit local `/etc/hosts` to map domain to localhost (requires sudo):
 ```bash
 sudo -- sh -c 'echo "127.0.0.1 adbsafegate.helloworld.com" >> /etc/hosts'
 ```
-Now open `https://adbsafegate.helloworld.com` in your browser (or http accordingly).
+Now open `https://adbsafegate.helloworld.com:8443` in your browser (or http accordingly).
 
 ---
 
 ### 11) Deploy monitoring role and access Grafana
+Preferred: trigger the Ansible Monitoring workflow in GitHub so the self-hosted runner on EC2 executes it.
+
+Manual on EC2 (if preferred):
 ```bash
 ansible-playbook main.yml --tags monitoring
 kubectl port-forward -n monitoring svc/grafana 3000:80 &
@@ -179,14 +181,21 @@ kubectl port-forward -n monitoring svc/grafana 3000:80 &
 ---
 
 ### 12) Deploy HPA and run load test
+Preferred: trigger the Ansible HPA workflow in GitHub so the self-hosted runner on EC2 executes it.
+
+Manual on EC2 (if preferred):
 ```bash
 ansible-playbook main.yml --tags hpa
 kubectl get hpa -n my-app
 ```
-Start a simple load from local (after port-forwarding the service):
+
+Once HPA is active you can generate load from EC2 using Apache `ab` (or a curl loop) specifying the ingress host header.
+
 ```bash
-for i in {1..200}; do curl -s http://localhost:8080/ > /dev/null & done
+## example using ab
+ab -n 1000 -c 50 -H "Host: adbsafegate.helloworld.com" http://127.0.0.1:8080/
 ```
+
 Verify HPA scaling:
 ```bash
 kubectl get hpa -n my-app -w
@@ -211,9 +220,3 @@ kubectl get pods -n my-app
 - Run Deployment → Service → Ingress (verify each)
 - Port-forward + update `/etc/hosts` → Open app locally
 - Run Monitoring → Grafana → HPA → load test
-
----
-
-If you want, I can also produce a printable checklist, a 1-page slide script, or export a PNG of the architecture diagram for your slides.
-
-**File added**: `RUNBOOK.md`
