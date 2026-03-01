@@ -17,10 +17,3 @@ spec:
       target:
         type: Utilization
         averageUtilization: 50
-  - type: Pods
-    pods:
-      metric:
-        name: requests_per_second
-      target:
-        type: AverageValue
-        averageValue: 100
