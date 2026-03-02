@@ -3,10 +3,8 @@ set -xe
 
 echo "Starting EC2 bootstrap..."
 
-############################################
-# 🖥 Update system and install dependencies
-############################################
 
+# Update system and install dependencies
 apt-get update -y
 apt-get upgrade -y
 
@@ -32,8 +30,6 @@ python3 -m pip install kubernetes
 # Enable Docker
 systemctl enable docker
 systemctl start docker
-
-# Add default user to docker group
 usermod -aG docker ubuntu
 
 # Install kubectl
@@ -45,35 +41,23 @@ mv kubectl /usr/local/bin/
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 install minikube-linux-amd64 /usr/local/bin/minikube
 
-############################################
-# 📦 Install Ansible
-############################################
 
-# Add Ansible PPA and install
+# Install Ansible
 apt-add-repository --yes --update ppa:ansible/ansible
 apt-get install -y ansible
 ansible --version
 
-############################################
-# 📦 Install Helm
-############################################
-HELM_VERSION="v3.12.0"
 
-# Download and extract Helm
+# Install Helm
+HELM_VERSION="v3.12.0"
 curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -o /tmp/helm.tar.gz
 tar -xzf /tmp/helm.tar.gz -C /tmp
-
-# Move Helm binary to /usr/local/bin
 mv /tmp/linux-amd64/helm /usr/local/bin/helm
 chmod +x /usr/local/bin/helm
-
-# Verify installation
 helm version
 
-############################################
-# 🔐 Fetch GitHub secrets
-############################################
 
+# Fetch GitHub secrets
 REGION="eu-central-1"
 SECRET_NAME="github-token-delete-me"
 
@@ -84,18 +68,14 @@ GITHUB_TOKEN=$(aws secretsmanager get-secret-value \
   --query SecretString \
   --output text | jq -r '.GITHUB_TOKEN')
 
-############################################
-# 📂 Clone Private Repo
-############################################
 
+# Clone Private Repo
 cd /home/ubuntu/
 git clone https://${GITHUB_TOKEN}@github.com/Varaprasad4127/k8s_assignment.git
 chown -R ubuntu:ubuntu k8s_assignment
 
-############################################
-# 🤖 Install GitHub Actions Runner
-############################################
 
+# Install GitHub Actions Runner
 RUNNER_DIR="/home/ubuntu/actions-runner"
 REPO_URL="https://github.com/Varaprasad4127/k8s_assignment"
 
@@ -131,10 +111,6 @@ sudo -u ubuntu ./config.sh --unattended --url $REPO_URL --token $RUNNER_TOKEN --
 echo "GitHub Actions runner installed and service started successfully."
 echo "Ansible installed and ready."
 
-############################################
-# 🧹 Clean up temporary/executable files
-############################################
-
 # Remove downloaded tarballs and binaries that are no longer needed
 rm -f /home/ubuntu/k8s_assignment/minikube-linux-amd64
 rm -f /home/ubuntu/k8s_assignment/kubectl
@@ -142,9 +118,6 @@ rm -f $RUNNER_DIR/actions-runner-linux-x64.tar.gz
 
 echo "Temporary installer files removed."
 
-############################################
-# 📋 Copy user-data logs for ubuntu user
-############################################
-
+# Copy user-data logs for ubuntu user
 cp /var/log/cloud-init-output.log /home/ubuntu/user-data.log
 echo "Bootstrap completed"
